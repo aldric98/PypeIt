@@ -247,8 +247,9 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
         # self.meta['mjd'] = dict(ext=0, card='MJD-OBS', required_ftypes=['science', 'standard'])
         self.meta['mjd'] = dict(card=None, compound=True)
         # This may depend on the old/new detector
-        #self.meta['exptime'] = dict(ext=0, card='EXPTIME')
+        # self.meta['exptime'] = dict(ext=0, card='EXPTIME')
         self.meta['exptime'] = dict(ext=0, card='ELAPTIME')
+        # airmass at start or end??
         self.meta['airmass'] = dict(ext=0, card='AIRMASS')
 
         # Extras for config and frametyping
@@ -260,6 +261,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
         self.meta['object'] = dict(ext=0, card='OBJECT')
         self.meta['idname'] = dict(card=None, compound=True)
         self.meta['frameno'] = dict(ext=0, card='FRAMENO')
+        # can only find instrument in UVES fits file??
         self.meta['instrument'] = dict(ext=0, card='INSTRUME')
         self.meta['lampstat01'] = dict(card=None, compound=True)
 
