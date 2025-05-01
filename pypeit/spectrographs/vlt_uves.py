@@ -44,20 +44,28 @@ class UVESMosaicLookUp:
                   'det2': {'shift': (2048.0 + 67.0, 0.), 'rotation': 0.}},
     }
 
-
+# KECKHIRES --> VLTUVES
 class KECKHIRESSpectrograph(spectrograph.Spectrograph):
     """
     Child to handle KECK/HIRES specific code.
 
     This spectrograph is not yet supported.
     """
-
+    # what should ndet be?
+    # because based on my understanding, if reducing blue arm: ndet = 1
+    # if reducing red arm: ndet = 2
     ndet = 3
+    # keck_hires --> vlt_uves
     name = 'keck_hires'
+    # Keck --> VLT
     telescope = telescopes.KeckTelescopePar()
+    # HIRES --> VLT
     camera = 'HIRES'
+    # https://www.eso.org/sci/facilities/paranal/instruments/uves.html
     url = 'https://www2.keck.hawaii.edu/inst/hires/'
+    # HIRES --> VLT
     header_name = 'HIRES'
+    # https://www.eso.org/sci/facilities/paranal/instruments/uves.html
     url = 'https://www2.keck.hawaii.edu/inst/hires/'
     pypeline = 'Echelle'
     ech_fixed_format = False
@@ -67,6 +75,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
     # 2. Test on several different setups - DONE
     # 3. Implement PCA extrapolation into the blue
 
+    # remove
     comment = 'Post detector upgrade (~ August 2004). See :doc:`keck_hires`'
 
 
@@ -82,6 +91,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
         """
         par = super().default_pypeit_par()
 
+        # what is this?
         par['rdx']['detnum'] = [(1,2,3)]
 
         # Adjustments to parameters for Keck HIRES
@@ -228,11 +238,16 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
         # Required (core)
         self.meta['ra'] = dict(ext=0, card='RA', required_ftypes=['science', 'standard'])
         self.meta['dec'] = dict(ext=0, card='DEC', required_ftypes=['science', 'standard'])
+        # card='OBJECT' -- but it says OBJECT  = 'LAMP,ORDERDEF'??
         self.meta['target'] = dict(ext=0, card='TARGNAME')
+        # UVES no decker??
         self.meta['decker'] = dict(ext=0, card='DECKNAME')
+        # have to do X and Y separately??
         self.meta['binning'] = dict(card=None, compound=True)
+        # self.meta['mjd'] = dict(ext=0, card='MJD-OBS', required_ftypes=['science', 'standard'])
         self.meta['mjd'] = dict(card=None, compound=True)
         # This may depend on the old/new detector
+        #self.meta['exptime'] = dict(ext=0, card='EXPTIME')
         self.meta['exptime'] = dict(ext=0, card='ELAPTIME')
         self.meta['airmass'] = dict(ext=0, card='AIRMASS')
 
