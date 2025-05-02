@@ -44,29 +44,19 @@ class UVESMosaicLookUp:
                   'det2': {'shift': (2048.0 + 67.0, 0.), 'rotation': 0.}},
     }
 
-# KECKHIRES --> VLTUVES
-class KECKHIRESSpectrograph(spectrograph.Spectrograph):
+class VLTUVESSpectrograph(spectrograph.Spectrograph):
     """
-    Child to handle KECK/HIRES specific code.
+    Child to handle VLT/UVES specific code.
 
     This spectrograph is not yet supported.
     """
-    # what should ndet be?
-    # because based on my understanding, if reducing blue arm: ndet = 1
-    # if reducing red arm: ndet = 2
-    ndet = 3
-    # keck_hires --> vlt_uves
-    name = 'keck_hires'
-    # Keck --> VLT
-    telescope = telescopes.KeckTelescopePar()
-    # HIRES --> VLT
-    camera = 'HIRES'
-    # https://www.eso.org/sci/facilities/paranal/instruments/uves.html
-    url = 'https://www2.keck.hawaii.edu/inst/hires/'
-    # HIRES --> VLT
-    header_name = 'HIRES'
-    # https://www.eso.org/sci/facilities/paranal/instruments/uves.html
-    url = 'https://www2.keck.hawaii.edu/inst/hires/'
+
+    name = 'vlt_uves'
+    telescope = telescopes.VLTTelescopePar()
+    camera = 'VLT'
+    url = 'https://www.eso.org/sci/facilities/paranal/instruments/uves.html'
+    header_name = 'VLT'
+    url = 'https://www.eso.org/sci/facilities/paranal/instruments/uves.html'
     pypeline = 'Echelle'
     ech_fixed_format = False
     supported = False
@@ -74,10 +64,6 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
     # 1. Implement flat fielding - DONE
     # 2. Test on several different setups - DONE
     # 3. Implement PCA extrapolation into the blue
-
-    # remove
-    comment = 'Post detector upgrade (~ August 2004). See :doc:`keck_hires`'
-
 
     # TODO: Place holder parameter set taken from X-shooter VIS for now.
     @classmethod
@@ -236,34 +222,24 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
         """
         self.meta = {}
         # Required (core)
-        self.meta['ra'] = dict(ext=0, card='RA', required_ftypes=['science', 'standard'])
+        # same as in vlt_xshooter
+        self.meta['ra'] = dict(ext=0, card='RA',
+            required_ftypes=['science', 'standard'])  # Need to convert to : separated
         self.meta['dec'] = dict(ext=0, card='DEC', required_ftypes=['science', 'standard'])
-        # card='OBJECT' -- but it says OBJECT  = 'LAMP,ORDERDEF'??
-        self.meta['target'] = dict(ext=0, card='TARGNAME')
-        # UVES no decker??
-        self.meta['decker'] = dict(ext=0, card='DECKNAME')
-        # have to do X and Y separately??
+        self.meta['target'] = dict(ext=0, card='OBJECT')
         self.meta['binning'] = dict(card=None, compound=True)
-        # self.meta['mjd'] = dict(ext=0, card='MJD-OBS', required_ftypes=['science', 'standard'])
-        self.meta['mjd'] = dict(card=None, compound=True)
-        # This may depend on the old/new detector
-        # self.meta['exptime'] = dict(ext=0, card='EXPTIME')
-        self.meta['exptime'] = dict(ext=0, card='ELAPTIME')
-        # airmass at start or end??
-        self.meta['airmass'] = dict(ext=0, card='AIRMASS')
 
+        self.meta['mjd'] = dict(ext=0, card='MJD-OBS')
+        self.meta['exptime'] = dict(ext=0, card='EXPTIME')
+        self.meta['airmass'] = dict(ext=0, card='HIERARCH ESO TEL AIRM START', required_ftypes=['science', 'standard'])
         # Extras for config and frametyping
-        self.meta['hatch'] = dict(ext=0, card='HATOPEN')
-        self.meta['dispname'] = dict(ext=0, card='XDISPERS')
-        self.meta['filter1'] = dict(ext=0, card='FIL1NAME')
-        self.meta['echangle'] = dict(ext=0, card='ECHANGL', rtol=1e-3, atol=1e-2)
-        self.meta['xdangle'] = dict(ext=0, card='XDANGL', rtol=1e-2)
-        self.meta['object'] = dict(ext=0, card='OBJECT')
-        self.meta['idname'] = dict(card=None, compound=True)
-        self.meta['frameno'] = dict(ext=0, card='FRAMENO')
-        # can only find instrument in UVES fits file??
+        self.meta['dispname'] = dict(ext=0, card=None, default='default')
+        self.meta['idname'] = dict(ext=0, card='HIERARCH ESO DPR CATG')
+        self.meta['arm'] = dict(ext=0, card='HIERARCH ESO SEQ ARM')
         self.meta['instrument'] = dict(ext=0, card='INSTRUME')
-        self.meta['lampstat01'] = dict(card=None, compound=True)
+        # Dithering -- Not required for redux
+        self.meta['dither'] = dict(ext=0, card='HIERARCH ESO SEQ CUMOFF Y',
+            required=False)  # This header card is *not* always present in science/standard frames
 
     def compound_meta(self, headarr, meta_key):
         """
@@ -280,47 +256,15 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
             object: Metadata value read from the header(s).
         """
         if meta_key == 'binning':
-            binspatial, binspec = parse.parse_binning(headarr[0]['BINNING'])
-            binning = parse.binning2string(binspec, binspatial)
-            return binning
-        elif meta_key == 'mjd':
-            if headarr[0].get('MJD', None) is not None:
-                return headarr[0]['MJD']
+            if 'HIERARCH ESO DET WIN1 BINX' in headarr[0]:
+                binspatial = headarr[0]['HIERARCH ESO DET WIN1 BINX']
             else:
-                return time.Time('{}T{}'.format(headarr[0]['DATE-OBS'], headarr[0]['UTC'])).mjd
-        elif meta_key == 'lampstat01':
-            if headarr[0].get('LAMPCAT1') or headarr[0].get('LAMPCAT2'):
-                return 'ThAr1' if headarr[0].get('LAMPCAT1') else 'ThAr2'
-            elif headarr[0].get('LAMPQTZ2') or (headarr[0].get('LAMPNAME') == 'quartz1'):
-                # LAMPNAME is a configurable keyword, so there is no guarantee that the values are correct,
-                # so we use LAMPQTZ2, but LAMPQTZ1 keyword doesn't exist, so we use LAMPNAME and hope for the best
-                return 'on'
+                binspatial = 1
+            if 'HIERARCH ESO DET WIN1 BINY' in headarr[0]:
+                binspec = headarr[0]['HIERARCH ESO DET WIN1 BINY']
             else:
-                return 'off'
-
-        elif meta_key == 'idname':
-            xcovopen = headarr[0].get('XCOVOPEN')
-            collcoveropen = (headarr[0].get('XDISPERS') == 'RED' and headarr[0].get('RCCVOPEN')) or \
-                        (headarr[0].get('XDISPERS') == 'UV' and headarr[0].get('BCCVOPEN'))
-
-            if xcovopen and collcoveropen and \
-                    not headarr[0].get('LAMPCAT1') and not headarr[0].get('LAMPCAT2') and \
-                    not headarr[0].get('LAMPQTZ2') and not (headarr[0].get('LAMPNAME') == 'quartz1'):
-                if headarr[0].get('HATOPEN') and headarr[0].get('AUTOSHUT'):
-                    return 'Object'
-                elif not headarr[0].get('HATOPEN'):
-                    return 'Bias' if not headarr[0].get('AUTOSHUT') else 'Dark'
-            elif xcovopen and collcoveropen and \
-                    headarr[0].get('AUTOSHUT') and (headarr[0].get('LAMPCAT1') or headarr[0].get('LAMPCAT2')):
-                return 'Line'
-            elif collcoveropen and \
-                    headarr[0].get('AUTOSHUT') and \
-                    (headarr[0].get('LAMPQTZ2') or (headarr[0].get('LAMPNAME') == 'quartz1')) and \
-                    not headarr[0].get('HATOPEN'):
-                if not xcovopen:
-                    return 'slitlessFlat'
-                else:
-                    return 'IntFlat'
+                binspec = 1
+            return parse.binning2string(binspec, binspatial)
 
         else:
             msgs.error("Not ready for this compound meta")
@@ -339,7 +283,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
             and used to constuct the :class:`~pypeit.metadata.PypeItMetaData`
             object.
         """
-        return ['dispname', 'decker', 'filter1', 'echangle', 'xdangle', 'binning']
+        return ['arm']
 
     def config_independent_frames(self):
         """
@@ -357,8 +301,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
             keywords that can be used to assign the frames to a configuration
             group.
         """
-        return {'bias': ['dispname', 'binning'], 'dark': ['dispname', 'binning'],
-                'slitless_pixflat': ['dispname', 'binning']}
+        return {}
 
     def raw_header_cards(self):
         """
@@ -378,7 +321,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
             :obj:`list`: List of keywords from the raw data files that should
             be propagated in output files.
         """
-        return ['FIL1NAME', 'ECHANGL', 'XDANGL']
+        return ['HIERARCH ESO SEQ ARM']
 
     def pypeit_file_keys(self):
         """
@@ -389,7 +332,7 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
             :class:`~pypeit.metadata.PypeItMetaData` instance to print to the
             :ref:`pypeit_file`.
         """
-        return super().pypeit_file_keys() + ['hatch', 'lampstat01', 'frameno']
+        return super().pypeit_file_keys() + ['dither']
 
     def check_frame_type(self, ftype, fitstbl, exprng=None):
         """
@@ -413,20 +356,26 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
         good_exp = framematch.check_frame_exptime(fitstbl['exptime'], exprng)
         # TODO: Allow for 'sky' frame type, for now include sky in
         # 'science' category
-        if ftype in ['science', 'standard']:
-            return good_exp & (fitstbl['idname'] == 'Object')
+        if ftype == 'science':
+            return good_exp & ((fitstbl['idname'] == 'SCIENCE')
+                                | (fitstbl['target'] == 'STD,TELLURIC')
+                                | (fitstbl['target'] == 'STD,SKY'))
+        if ftype == 'standard':
+            return good_exp & (fitstbl['target'] == 'STD,FLUX')
         if ftype == 'bias':
-            return good_exp & (fitstbl['idname'] == 'Bias')
+            return good_exp & (fitstbl['target'] == 'BIAS')
         if ftype == 'dark':
-            return good_exp & (fitstbl['idname'] == 'Dark')
-        if ftype == 'slitless_pixflat':
-            return good_exp & (fitstbl['idname'] == 'slitlessFlat')
-        if ftype in ['illumflat', 'pixelflat', 'trace']:
+            return good_exp & (fitstbl['target'] == 'DARK')
+        if ftype in ['pixelflat', 'trace', 'illumflat']:
             # Flats and trace frames are typed together
-            return good_exp & (fitstbl['idname'] == 'IntFlat')
+            return good_exp & ((fitstbl['target'] == 'LAMP,DFLAT')
+                               | (fitstbl['target'] == 'LAMP,QFLAT')
+                               | (fitstbl['target'] == 'LAMP,FLAT'))
+        if ftype == 'pinhole':
+            # Don't type pinhole
+            return np.zeros(len(fitstbl), dtype=bool)
         if ftype in ['arc', 'tilt']:
-            # Arc and tilt frames are typed together
-            return good_exp & (fitstbl['idname'] == 'Line')
+            return good_exp & (fitstbl['target'] == 'LAMP,WAVE')
 
         msgs.warn('Cannot determine if frames are of type {0}.'.format(ftype))
         return np.zeros(len(fitstbl), dtype=bool)
@@ -855,6 +804,12 @@ class KECKHIRESSpectrograph(spectrograph.Spectrograph):
 
         # Assume no significant variation (which is likely true)
         return np.ones_like(order_vec)*det.platescale*binspatial
+        
+class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
+    ndet = 1
+
+class VLTUVESRedSpectrograph(VLTUVESSpectrograph):
+    ndet = 3
 
 def indexing(itt, postpix, det=None,xbin=1,ybin=1):
     """
