@@ -606,81 +606,6 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         return mosaic, image, hdu, exptime, rawdatasec_img, oscansec_img
 
 
-    def get_mosaic_par(self, mosaic, hdu=None, msc_ord=0):
-        """
-        Return the hard-coded parameters needed to construct detector mosaics
-        from unbinned images.
-
-        The parameters expect the images to be trimmed and oriented to follow
-        the PypeIt shape convention of ``(nspec,nspat)``.  For returned
-        lists, the length of the list is the same as the number of detectors in
-        the mosaic, and they are ordered by the detector number.
-
-        Args:
-            mosaic (:obj:`tuple`):
-                Tuple of detector numbers used to construct the mosaic.  Must be
-                one among the list of possible mosaics as hard-coded by the
-                :func:`allowed_mosaics` function.
-            hdu (`astropy.io.fits.HDUList`_, optional):
-                The open fits file with the raw image of interest.  If not
-                provided, frame-dependent detector parameters are set to a
-                default.  BEWARE: If ``hdu`` is not provided, the binning is
-                assumed to be `1,1`, which will cause faults if applied to
-                binned images!
-            msc_ord (:obj:`int`, optional):
-                Order of the interpolation used to construct the mosaic.
-
-        Returns:
-            :class:`~pypeit.images.mosaic.Mosaic`: Object with the mosaic *and*
-            detector parameters.
-        """
-
-        # Validate the entered (list of) detector(s)
-        nimg, _ = self.validate_det(mosaic)
-
-        # Index of mosaic in list of allowed detector combinations
-        mosaic_id = self.allowed_mosaics.index(mosaic)+1
-        detid = f'MSC0{mosaic_id}'
-
-        # Get the detectors
-        detectors = np.array([self.get_detector_par(det, hdu=hdu) for det in mosaic])
-        # Binning *must* be consistent for all detectors
-        if any(d.binning != detectors[0].binning for d in detectors[1:]):
-            msgs.error('Binning is somehow inconsistent between detectors in the mosaic!')
-
-        # Collect the offsets and rotations for *all unbinned* detectors in the
-        # full instrument, ordered by the number of the detector.  Detector
-        # numbers must be sequential and 1-indexed.
-        # See the mosaic documentattion.
-        msc_geometry = HIRESMosaicLookUp.geometry
-        expected_shape = msc_geometry[detid]['default_shape']
-        shift = np.array([(msc_geometry[detid]['blue_det']['shift'][0], msc_geometry[detid]['blue_det']['shift'][1]),
-                          (msc_geometry[detid]['green_det']['shift'][0], msc_geometry[detid]['green_det']['shift'][1]),
-                          (msc_geometry[detid]['red_det']['shift'][0], msc_geometry[detid]['red_det']['shift'][1])])
-
-        rotation = np.array([msc_geometry[detid]['blue_det']['rotation'], msc_geometry[detid]['green_det']['rotation'],
-                             msc_geometry[detid]['red_det']['rotation']])
-
-        # The binning and process image shape must be the same for all images in
-        # the mosaic
-        binning = tuple(int(b) for b in detectors[0].binning.split(','))
-        shape = tuple(n // b for n, b in zip(expected_shape, binning))
-
-        msc_sft = [None]*nimg
-        msc_rot = [None]*nimg
-        msc_tfm = [None]*nimg
-
-        for i in range(nimg):
-            msc_sft[i] = shift[i]
-            msc_rot[i] = rotation[i]
-            # binning is here in the PypeIt convention of (binspec, binspat), but the mosaic tranformations
-            # occur in the raw data frame, which flips spectral and spatial
-            msc_tfm[i] = build_image_mosaic_transform(shape, msc_sft[i], msc_rot[i], tuple(reversed(binning)))
-
-        return Mosaic(mosaic_id, detectors, shape, np.array(msc_sft), np.array(msc_rot),
-                      np.array(msc_tfm), msc_ord)
-
-
     @property
     def allowed_mosaics(self):
         """
@@ -810,6 +735,79 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
 
 class VLTUVESRedSpectrograph(VLTUVESSpectrograph):
     ndet = 3
+    
+    def get_mosaic_par(self, mosaic, hdu=None, msc_ord=0):
+        """
+        Return the hard-coded parameters needed to construct detector mosaics
+        from unbinned images.
+
+        The parameters expect the images to be trimmed and oriented to follow
+        the PypeIt shape convention of ``(nspec,nspat)``.  For returned
+        lists, the length of the list is the same as the number of detectors in
+        the mosaic, and they are ordered by the detector number.
+
+        Args:
+            mosaic (:obj:`tuple`):
+                Tuple of detector numbers used to construct the mosaic.  Must be
+                one among the list of possible mosaics as hard-coded by the
+                :func:`allowed_mosaics` function.
+            hdu (`astropy.io.fits.HDUList`_, optional):
+                The open fits file with the raw image of interest.  If not
+                provided, frame-dependent detector parameters are set to a
+                default.  BEWARE: If ``hdu`` is not provided, the binning is
+                assumed to be `1,1`, which will cause faults if applied to
+                binned images!
+            msc_ord (:obj:`int`, optional):
+                Order of the interpolation used to construct the mosaic.
+
+        Returns:
+            :class:`~pypeit.images.mosaic.Mosaic`: Object with the mosaic *and*
+            detector parameters.
+        """
+
+        # Validate the entered (list of) detector(s)
+        nimg, _ = self.validate_det(mosaic)
+
+        # Index of mosaic in list of allowed detector combinations
+        mosaic_id = self.allowed_mosaics.index(mosaic)+1
+        # is this needed? Since only red arm MSCO2 needs mosaic
+        detid = f'MSC0{mosaic_id}'
+
+        # Get the detectors
+        detectors = np.array([self.get_detector_par(det, hdu=hdu) for det in mosaic])
+        # Binning *must* be consistent for all detectors
+        if any(d.binning != detectors[0].binning for d in detectors[1:]):
+            msgs.error('Binning is somehow inconsistent between detectors in the mosaic!')
+
+        # Collect the offsets and rotations for *all unbinned* detectors in the
+        # full instrument, ordered by the number of the detector.  Detector
+        # numbers must be sequential and 1-indexed.
+        # See the mosaic documentattion.
+        msc_geometry = HIRESMosaicLookUp.geometry
+        expected_shape = msc_geometry[detid]['default_shape']
+        shift = np.array([(msc_geometry[detid]['det1']['shift'][0], msc_geometry[detid]['det1']['shift'][1]),
+                          (msc_geometry[detid]['det2']['shift'][0], msc_geometry[detid]['det2']['shift'][1])
+
+        rotation = np.array([msc_geometry[detid]['det1']['rotation'], msc_geometry[detid]['det2']['rotation']])
+
+        # The binning and process image shape must be the same for all images in
+        # the mosaic
+        binning = tuple(int(b) for b in detectors[0].binning.split(','))
+        shape = tuple(n // b for n, b in zip(expected_shape, binning))
+
+        msc_sft = [None]*nimg
+        msc_rot = [None]*nimg
+        msc_tfm = [None]*nimg
+
+        for i in range(nimg):
+            msc_sft[i] = shift[i]
+            msc_rot[i] = rotation[i]
+            # binning is here in the PypeIt convention of (binspec, binspat), but the mosaic tranformations
+            # occur in the raw data frame, which flips spectral and spatial
+            msc_tfm[i] = build_image_mosaic_transform(shape, msc_sft[i], msc_rot[i], tuple(reversed(binning)))
+
+        return Mosaic(mosaic_id, detectors, shape, np.array(msc_sft), np.array(msc_rot),
+                      np.array(msc_tfm), msc_ord)
 
 def indexing(itt, postpix, det=None,xbin=1,ybin=1):
     """
