@@ -51,9 +51,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
     This spectrograph is not yet supported.
     """
 
-    name = 'vlt_uves'
     telescope = telescopes.VLTTelescopePar()
-    camera = 'VLT'
     url = 'https://www.eso.org/sci/facilities/paranal/instruments/uves.html'
     header_name = 'VLT'
     url = 'https://www.eso.org/sci/facilities/paranal/instruments/uves.html'
@@ -91,7 +89,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         # Set the default exposure time ranges for the frame typing
         par['calibrations']['biasframe']['exprng'] = [None, 0.001]
         #par['calibrations']['darkframe']['exprng'] = [999999, None]     # No dark frames
-        par['calibrations']['pinholeframe']['exprng'] = [999999, None]  # No pinhole frames
+        #par['calibrations']['pinholeframe']['exprng'] = [999999, None]  # No pinhole frames on UVES ??
         par['calibrations']['pixelflatframe']['exprng'] = [None, 60]
         par['calibrations']['traceframe']['exprng'] = [None, 60]
         par['calibrations']['illumflatframe']['exprng'] = [None, 60]
@@ -606,24 +604,6 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         return mosaic, image, hdu, exptime, rawdatasec_img, oscansec_img
 
 
-    @property
-    def allowed_mosaics(self):
-        """
-        Return the list of allowed detector mosaics.
-
-        Keck/HIRES only allows for mosaicing all three detectors.
-
-        Returns:
-            :obj:`list`: List of tuples, where each tuple provides the 1-indexed
-            detector numbers that can be combined into a mosaic and processed by
-            PypeIt.
-        """
-        return [(1,2,3)]
-
-    @property
-    def default_mosaic(self):
-        return self.allowed_mosaics[0]
-
     def get_detector_par(self, det, hdu=None):
         """
         Return metadata for the selected detector.
@@ -729,12 +709,38 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
 
         # Assume no significant variation (which is likely true)
         return np.ones_like(order_vec)*det.platescale*binspatial
-        
+
+
+# default_pypeit_par and get_detector_par different for each arm??
 class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
+    
+    name = 'vlt_uves_blue'
+    camera = 'VLT_UVES_blue'
     ndet = 1
 
 class VLTUVESRedSpectrograph(VLTUVESSpectrograph):
+
+    name = 'vlt_uves_red'
+    camera = 'VLT_UVES_red'
     ndet = 3
+    
+    @property
+    def allowed_mosaics(self):
+        """
+        Return the list of allowed detector mosaics.
+
+        Only red arm on VLT/UVES requires mosaicing.
+
+        Returns:
+            :obj:`list`: List of tuples, where each tuple provides the 1-indexed
+            detector numbers that can be combined into a mosaic and processed by
+            PypeIt.
+        """
+        return [(1,2,3)]
+        
+    @property
+    def default_mosaic(self):
+        return self.allowed_mosaics[0]
     
     def get_mosaic_par(self, mosaic, hdu=None, msc_ord=0):
         """
