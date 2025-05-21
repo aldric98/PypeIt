@@ -84,11 +84,8 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         # Extras for config and frametyping
         self.meta['dispname'] = dict(ext=0, card=None, default='default')
         self.meta['idname'] = dict(ext=0, card='HIERARCH ESO DPR CATG')
-        self.meta['arm'] = dict(ext=0, card='HIERARCH ESO SEQ ARM')
+        self.meta['arm'] = dict(ext=0, card='HIERARCH ESO INS PATH')
         self.meta['instrument'] = dict(ext=0, card='INSTRUME')
-        # Dithering -- Not required for redux
-        self.meta['dither'] = dict(ext=0, card='HIERARCH ESO SEQ CUMOFF Y',
-            required=False)  # This header card is *not* always present in science/standard frames
 
     def compound_meta(self, headarr, meta_key):
         """
@@ -513,7 +510,7 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
         par = super().default_pypeit_par()
 
         # what is this?
-        par['rdx']['detnum'] = [(1,2,3)]
+        # par['rdx']['detnum'] = [(1,2,3)]
 
         # Adjustments to parameters for Keck HIRES
         turn_off_on = dict(use_biasimage=False, use_overscan=True, overscan_method='median')
@@ -534,7 +531,7 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
         par['scienceframe']['exprng'] = [601, None]
 
         # Set default processing for slitless_pixflat
-        par['calibrations']['slitless_pixflatframe']['process']['scale_to_mean'] = True
+        # par['calibrations']['slitless_pixflatframe']['process']['scale_to_mean'] = True
 
         # Slit tracing
         par['calibrations']['slitedges']['edge_thresh'] = 8.0
@@ -597,23 +594,23 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
         par['reduce']['findobj']['maxnumber_std'] = 1  # Assume that there is only one object in each order.
 
         # Sensitivity function parameters
-        par['sensfunc']['algorithm'] = 'IR'
-        par['sensfunc']['polyorder'] = 5 #[9, 11, 11, 9, 9, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7]
-        par['sensfunc']['IR']['telgridfile'] = 'TellPCA_3000_10500_R120000.fits'
-        par['sensfunc']['IR']['pix_shift_bounds'] = (-40.0,40.0)
+        # par['sensfunc']['algorithm'] = 'IR'
+        # par['sensfunc']['polyorder'] = 5 #[9, 11, 11, 9, 9, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7]
+        # par['sensfunc']['IR']['telgridfile'] = 'TellPCA_3000_10500_R120000.fits'
+        # par['sensfunc']['IR']['pix_shift_bounds'] = (-40.0,40.0)
         
         # Telluric parameters
         # HIRES is usually oversampled, so the helio shift can be large
-        par['telluric']['pix_shift_bounds'] = (-40.0,40.0)
+        # par['telluric']['pix_shift_bounds'] = (-40.0,40.0)
         # Similarly, the resolution guess is higher than it should be
-        par['telluric']['resln_frac_bounds'] = (0.25,1.25)
+        # par['telluric']['resln_frac_bounds'] = (0.25,1.25)
 
         # Coadding
         par['coadd1d']['wave_method'] = 'log10'
 
         return par
         
-        def get_detector_par(self, det, hdu=None):
+    def get_detector_par(self, det, hdu=None):
         """
         Return metadata for the selected detector.
 
@@ -717,6 +714,23 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
 
         # Return
         return par
+        
+    def init_meta(self):
+        """
+        Define how metadata are derived from the spectrograph files.
+
+        That is, this associates the PypeIt-specific metadata keywords
+        with the instrument-specific header cards using :attr:`meta`.
+        """
+        super().init_meta()
+        # No binning in the NIR
+        self.meta['binning'] = dict(card=None, default='1,1')
+
+        # Required
+        self.meta['decker'] = dict(ext=0, card='HIERARCH ESO INS SLIT2 WID')
+    
+        # Dark-flat identification via exposure number
+        # self.meta['seq_expno'] = dict(ext=0, card='HIERARCH ESO TPL EXPNO')
 
 class VLTUVESRedSpectrograph(VLTUVESSpectrograph):
 
@@ -940,7 +954,7 @@ class VLTUVESRedSpectrograph(VLTUVESSpectrograph):
         msc_geometry = HIRESMosaicLookUp.geometry
         expected_shape = msc_geometry[detid]['default_shape']
         shift = np.array([(msc_geometry[detid]['det1']['shift'][0], msc_geometry[detid]['det1']['shift'][1]),
-                          (msc_geometry[detid]['det2']['shift'][0], msc_geometry[detid]['det2']['shift'][1])
+                          (msc_geometry[detid]['det2']['shift'][0], msc_geometry[detid]['det2']['shift'][1])])
 
         rotation = np.array([msc_geometry[detid]['det1']['rotation'], msc_geometry[detid]['det2']['rotation']])
 
@@ -963,7 +977,7 @@ class VLTUVESRedSpectrograph(VLTUVESSpectrograph):
         return Mosaic(mosaic_id, detectors, shape, np.array(msc_sft), np.array(msc_rot),
                       np.array(msc_tfm), msc_ord)
                       
-        def get_detector_par(self, det, hdu=None):
+    def get_detector_par(self, det, hdu=None):
         """
         Return metadata for the selected detector.
 
