@@ -53,9 +53,9 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
 
     telescope = telescopes.VLTTelescopePar()
     url = 'https://www.eso.org/sci/facilities/paranal/instruments/uves.html'
-    header_name = 'VLT'
+    header_name = 'UVES'
     pypeline = 'Echelle'
-    ech_fixed_format = False # WHAT IS THIS??
+    ech_fixed_format = True
     supported = False
     # TODO before support = True
     # 1. Implement flat fielding - DONE
@@ -82,7 +82,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         self.meta['exptime'] = dict(ext=0, card='EXPTIME')
         self.meta['airmass'] = dict(ext=0, card='HIERARCH ESO TEL AIRM START', required_ftypes=['science', 'standard'])
         # Extras for config and frametyping
-        self.meta['dispname'] = dict(ext=0, card=None, default='default')
+        self.meta['dispname'] = dict(ext=0, card='HIERARCH ESO INS GRAT1 WLEN')
         self.meta['idname'] = dict(ext=0, card='HIERARCH ESO DPR CATG')
         self.meta['arm'] = dict(ext=0, card='HIERARCH ESO INS PATH')
         self.meta['instrument'] = dict(ext=0, card='INSTRUME')
@@ -129,7 +129,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
             and used to constuct the :class:`~pypeit.metadata.PypeItMetaData`
             object.
         """
-        return ['arm']
+        return ['arm','dispname']
 
     def config_independent_frames(self):
         """
@@ -147,7 +147,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
             keywords that can be used to assign the frames to a configuration
             group.
         """
-        return {}
+        return {'bias':'binning', 'dark':'binning'}
 
     def raw_header_cards(self):
         """
