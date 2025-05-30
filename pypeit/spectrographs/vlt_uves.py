@@ -82,9 +82,11 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         self.meta['exptime'] = dict(ext=0, card='EXPTIME')
         self.meta['airmass'] = dict(ext=0, card='HIERARCH ESO TEL AIRM START', required_ftypes=['science', 'standard'])
         # Extras for config and frametyping
-        self.meta['dispname'] = dict(ext=0, card='HIERARCH ESO INS GRAT1 WLEN')
+        # self.meta['dispname'] = dict(ext=0, card='HIERARCH ESO INS GRAT1 WLEN')
+        self.meta['dispname'] = dict(card=None, compound=True)
         self.meta['idname'] = dict(ext=0, card='HIERARCH ESO DPR CATG')
-        self.meta['arm'] = dict(ext=0, card='HIERARCH ESO INS PATH')
+        # self.meta['arm'] = dict(ext=0, card='HIERARCH ESO INS PATH')
+        self.meta['arm'] = dict(card=None, compound=True)
         self.meta['instrument'] = dict(ext=0, card='INSTRUME')
 
     def compound_meta(self, headarr, meta_key):
@@ -112,8 +114,32 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
                 binspec = 1
             return parse.binning2string(binspec, binspatial)
 
+        elif meta_key == 'arm':
+            if 'HIERARCH ESO TPL NAME' in headarr[0]:
+                tplid = headarr[0]['HIERARCH ESO TPL NAME'].lower()
+                if 'blue' in tplid:
+                    arm = 'BLUE'
+                elif 'red' in tplid:
+                    arm = ('RED')
+                elif 'HIERARCH ESO INS PATH' in headarr[0]:
+                    arm = headarr[0]['HIERARCH ESO INS PATH']
+                else:
+                    arm = 'None'
+            return arm
+
+        elif meta_key == 'dispname':
+            if 'HIERARCH ESO INS GRAT1 WLEN' in headarr[0]:
+                cwlen = headarr[0]['HIERARCH ESO INS GRAT1 WLEN']
+            elif 'HIERARCH ESO INS GRAT2 WLEN' in headarr[0]:
+                cwlen = headarr[0]['HIERARCH ESO INS GRAT2 WLEN']
+            else:
+                cwlen = 'None'
+            return cwlen
+
         else:
             msgs.error("Not ready for this compound meta")
+
+
 
     def configuration_keys(self):
         """
