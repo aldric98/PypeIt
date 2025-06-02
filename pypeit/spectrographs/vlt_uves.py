@@ -173,7 +173,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
             keywords that can be used to assign the frames to a configuration
             group.
         """
-        return {'bias':'binning', 'dark':'binning'}
+        return {'bias':['binning', 'arm'], 'dark':['binning', 'arm']}
 
     def raw_header_cards(self):
         """
@@ -410,23 +410,21 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         head0 = hdu[0].header
 
         # Get post, pre-pix values
-        precol = head0['PRECOL']
-        postpix = head0['POSTPIX']
-        preline = head0['PRELINE']
-        postline = head0['POSTLINE']
-        detlsize = head0['DETLSIZE']
-        x0, x_npix, y0, y_npix = np.array(parse.load_sections(detlsize)).flatten()
+        precol = head0['HIERARCH ESO DET OUT1 PRSCX']
+        postpix = head0['HIERARCH ESO DET OUT1 OVSCX']
+        preline = head0['HIERARCH ESO DET OUT1 PRSCY']
+        postline = head0['HIERARCH ESO DET OUT1 OVSCY']
+        x0 = head0['HIERARCH ESO DET WIN1 STRX'] # lower left pixel of X
+        x_npix = head0['HIERARCH ESO DET WIN1 NX'] - x0 + 1 # no. of pixels along X
+        y0 = head0['HIERARCH ESO DET WIN1 STRY'] # lower left pixel of Y
+        y_npix = head0['HIERARCH ESO DET WIN1 NY'] - y0 + 1 # no. of pixels along Y
 
         # get the x and y binning factors...
         #binning = head0['BINNING']
 
         binning = self.get_meta_value(self.get_headarr(hdu), 'binning')
-#        # TODO: JFH I think this works fine
-#        if binning != '3,1':
-#            msgs.warn("This binning for HIRES might not work.  But it might..")
+        binspec, binspatial = map(int, binning.split(','))
 
-        # We are flipping this because HIRES stores the binning oppostire of the (binspec, binspat) pypeit convention.
-        binspatial, binspec = parse.parse_binning(head0['BINNING'])
         # Validate the entered (list of) detector(s)
         nimg, _det = self.validate_det(det)
 
@@ -451,7 +449,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
             rawdatasec_img = np.zeros_like(image, dtype=int)
             oscansec_img = np.zeros_like(image, dtype=int)
         else:
-            data, oscan = hires_read_1chip(hdu, chips[0] + 1)
+            data, oscan = uves_read_1chip(hdu, chips[0] + 1)
             image = np.zeros((nimg, data.shape[0], data.shape[1] + oscan.shape[1]))
             rawdatasec_img = np.zeros_like(image, dtype=int)
             oscansec_img = np.zeros_like(image, dtype=int)
@@ -459,7 +457,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
 
         # Loop over the chips
         for ii, tt in enumerate(chips):
-            image_ii, oscan_ii = hires_read_1chip(hdu, tt + 1)
+            image_ii, oscan_ii = uves_read_1chip(hdu, tt + 1)
 
             # Indexing
             x1, x2, y1, y2, o_x1, o_x2, o_y1, o_y2 = indexing(tt, postpix, det=det, xbin=binspatial, ybin=binspec)
@@ -651,59 +649,42 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
             :class:`~pypeit.images.detector_container.DetectorContainer`:
             Object with the detector metadata.
         """
+
         # Binning
         binning = '1,1' if hdu is None else self.get_meta_value(self.get_headarr(hdu), 'binning')
 
-        # Detector 1
-
-        detector_dict1 = dict(
+        # Detector
+        detector_dict = dict(
             binning         = binning,
             det             = 1,
-            dataext         = 1,
+            dataext         = 0,
             specaxis        = 0,
             specflip        = False,
             spatflip        = False,
-            platescale      = 0.135,
+            platescale      = 0.22,
             darkcurr        = 0.0,  # e-/pixel/hour
             saturation      = 65535.,
             nonlinear       = 0.7, # Website says 0.6, but we'll push it a bit
             mincounts       = -1e10,
             numamplifiers   = 1,
-            ronoise         = np.atleast_1d([2.8]),
+            gain            = np.atleast_1d([hdu[0].header['HIERARCH ESO DET OUT1 GAIN']]),
+            ronoise         = np.atleast_1d([hdu[0].header['HIERARCH ESO DET OUT1 RON']]),
+            datasec         = np.atleast_1d('[:,51:2098]'), # '[49:2000,1:2999]',  49  2099
+            oscansec        = np.atleast_1d('[:,4:50]'), # '[1:48, 1:2999]',
             )
 
-        # Detector 2.
-        detector_dict2 = detector_dict1.copy()
-        detector_dict2.update(dict(
-            det=2,
-            dataext=2,
-            ronoise=np.atleast_1d([3.1])
-        ))
-
-
-        # Detector 3,.
-        detector_dict3 = detector_dict1.copy()
-        detector_dict3.update(dict(
-            det=3,
-            dataext=3,
-            ronoise=np.atleast_1d([3.1])
-        ))
-
+        # Not needed for UVES??
         # Set gain
-        # https://www2.keck.hawaii.edu/inst/hires/instrument_specifications.html
-        if hdu is None or hdu[0].header['CCDGAIN'].strip() == 'low':
-            detector_dict1['gain'] = np.atleast_1d([1.9])
-            detector_dict2['gain'] = np.atleast_1d([2.1])
-            detector_dict3['gain'] = np.atleast_1d([2.1])
-        elif hdu[0].header['CCDGAIN'].strip() == 'high':
-            detector_dict1['gain'] = np.atleast_1d([0.78])
-            detector_dict2['gain'] = np.atleast_1d([0.86])
-            detector_dict3['gain'] = np.atleast_1d([0.84])
-        else:
-            msgs.error("Bad CCDGAIN mode for HIRES")
+        # https://www.eso.org/sci/facilities/paranal/instruments/uves/doc/ESO_514367_User_Manual_P115.pdf
+        # if hdu is None or hdu[0].header['HIERARCH ESO DET OUT1 GAIN'].strip() == 'low':
+        #     detector_dict['gain'] = np.atleast_1d([1.84])
+        # elif hdu[0].header['HIERARCH ESO DET OUT1 GAIN'].strip() == 'high':
+        #     detector_dict['gain'] = np.atleast_1d([0.54])
+        # else:
+        #     msgs.error("Bad HIERARCH ESO DET OUT1 GAIN mode for UVES")
             
         # Instantiate
-        detector_dicts = [detector_dict1, detector_dict2, detector_dict3]
+        detector_dicts = [detector_dict]
         return detector_container.DetectorContainer( **detector_dicts[det-1])
 
     def config_specific_par(self, scifile, inp_par=None):
@@ -1109,7 +1090,7 @@ def indexing(itt, postpix, det=None,xbin=1,ybin=1):
     # Return
     return x1, x2, y1, y2, o_x1, o_x2, o_y1, o_y2
 
-def hires_read_1chip(hdu,chipno):
+def uves_read_1chip(hdu,chipno):
     """ Read one of the HIRES detectors
 
     Parameters
@@ -1124,13 +1105,22 @@ def hires_read_1chip(hdu,chipno):
     """
 
     # Extract datasec from header
-    datsec = hdu[chipno].header['DATASEC']
-    detsec = hdu[chipno].header['DETSEC']
-    postpix = hdu[0].header['POSTPIX']
-    precol = hdu[0].header['PRECOL']
+    x_pix = hdu[0].header['NAXIS1']
+    x0 = hdu[0].header['HIERARCH ESO DET WIN1 STRX']
+    y_pix = hdu[0].header['NAXIS2']
+    y0 = hdu[0].header['HIERARCH ESO DET WIN1 STRY']
+    precol = hdu[0].header['HIERARCH ESO DET OUT1 PRSCX']
+    postpix = hdu[0].header['HIERARCH ESO DET OUT1 OVSCX']
 
-    x1_dat, x2_dat, y1_dat, y2_dat = np.array(parse.load_sections(datsec)).flatten()
-    x1_det, x2_det, y1_det, y2_det = np.array(parse.load_sections(detsec)).flatten()
+    x1_dat = precol + x0
+    x2_dat = x_pix - postpix
+    y1_dat = y0
+    y2_dat = y_pix
+
+    x1_det = x0
+    x2_det = hdu[0].header['HIERARCH ESO DET OUT1 NX']
+    y1_det = y0
+    y2_det = hdu[0].header['HIERARCH ESO DET OUT1 NY']
 
     # This rotates the image to be increasing wavelength to the top
     #data = np.rot90((hdu[chipno].data).T, k=2)

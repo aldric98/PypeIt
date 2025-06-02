@@ -1,0 +1,158 @@
+# Auto-generated calibration association file using PypeIt version:  1.17.4.dev283+g0f61dd0f9
+# UTC 2025-05-30T13:35:39.082+00:00
+# NOTE: DET01 is a placeholder for the reduced detectors/mosaics
+A:
+  --:
+    arm: BLUE
+    dispname: '390.0'
+  0:
+    arc:
+      proc:
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Arc_A_0_DET01.fits
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/WaveCalib_A_0_DET01.fits
+      raw:
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:43:17.577.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T01:59:34.784.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:09:22.375.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T11:12:35.350.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T11:22:37.505.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:30:20.421.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T11:48:04.186.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T11:54:13.114.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-26T09:01:18.628.fits"'
+    bias:
+      proc:
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Bias_A_0_DET01.fits
+      raw:
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:10:33.571.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:11:19.154.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:12:04.728.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:12:50.312.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:13:35.895.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T15:16:55.570.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T15:17:41.144.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T15:18:26.717.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T15:19:12.301.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T15:19:57.875.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T10:03:22.886.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T10:04:08.470.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T10:04:54.044.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T10:05:39.617.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T10:06:25.190.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T09:52:41.529.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T09:54:12.696.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T09:54:58.279.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T09:55:43.863.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:31:31.536.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:32:17.109.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:33:02.682.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:33:48.257.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:34:33.830.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T10:12:12.045.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T10:12:57.629.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T10:13:43.202.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T10:14:28.785.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T10:15:14.369.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T10:21:09.954.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T10:21:49.238.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T10:22:28.481.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T10:23:07.513.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T10:23:46.767.fits"'
+    illumflat:
+      proc:
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Flat_A_0_DET01.fits
+      raw:
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:37:29.399.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:38:20.189.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:39:10.798.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:40:01.748.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:40:52.866.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:29:48.253.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:31:19.652.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:32:51.795.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:34:26.190.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:36:02.354.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T09:59:53.472.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:01:46.181.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:03:39.379.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:05:32.378.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:07:24.987.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:20:52.037.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:22:44.875.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:24:37.854.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:26:30.572.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:28:23.521.fits"'
+    pixelflat:
+      proc:
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Flat_A_0_DET01.fits
+      raw:
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:37:29.399.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:38:20.189.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:39:10.798.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:40:01.748.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:40:52.866.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:29:48.253.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:31:19.652.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:32:51.795.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:34:26.190.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:36:02.354.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T09:59:53.472.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:01:46.181.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:03:39.379.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:05:32.378.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:07:24.987.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:20:52.037.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:22:44.875.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:24:37.854.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:26:30.572.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:28:23.521.fits"'
+    science:
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T05:56:18.447.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-19T06:45:28.242.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T05:29:29.135.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T06:18:25.113.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T07:07:40.984.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T06:35:52.558.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T07:25:41.271.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T08:15:44.905.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T07:19:50.796.fits"'
+    - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T04:38:08.522.fits"'
+    tilt:
+      proc:
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Tiltimg_A_0_DET01.fits
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Tilts_A_0_DET01.fits
+      raw:
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:43:17.577.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T01:59:34.784.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:09:22.375.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-21T11:12:35.350.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-22T11:22:37.505.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:30:20.421.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-24T11:48:04.186.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-25T11:54:13.114.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-26T09:01:18.628.fits"'
+    trace:
+      proc:
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Edges_A_0_DET01.fits.gz
+      - /Users/aldric/Desktop/software/PypeIt/Calibrations/Slits_A_0_DET01.fits.gz
+      raw:
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:37:29.399.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:38:20.189.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:39:10.798.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:40:01.748.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-15T10:40:52.866.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:29:48.253.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:31:19.652.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:32:51.795.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:34:26.190.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2001-09-27T14:36:02.354.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T09:59:53.472.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:01:46.181.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:03:39.379.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:05:32.378.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-18T10:07:24.987.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:20:52.037.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:22:44.875.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:24:37.854.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:26:30.572.fits"'
+      - '"/Users/aldric/Desktop/phd/data/sk143_all/fits/UVES.2008-09-23T10:28:23.521.fits"'
