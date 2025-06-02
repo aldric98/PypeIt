@@ -365,116 +365,116 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         else:
             return super().parse_raw_files(fitstbl, det=det, ftype=ftype)
 
-    def get_rawimage(self, raw_file, det, spectrim=20):
-        """
-        Read raw images and generate a few other bits and pieces
-        that are key for image processing.
-
-        Based on readmhdufits.pro
-
-        Parameters
-        ----------
-        raw_file : :obj:`str`
-            File to read
-        det : :obj:`int`
-            1-indexed detector to read
-
-        Returns
-        -------
-        detector_par : :class:`pypeit.images.detector_container.DetectorContainer`
-            Detector metadata parameters.
-        raw_img : `numpy.ndarray`_
-            Raw image for this detector.
-        hdu : `astropy.io.fits.HDUList`_
-            Opened fits file
-        exptime : :obj:`float`
-            Exposure time read from the file header
-        rawdatasec_img : `numpy.ndarray`_
-            Data (Science) section of the detector as provided by setting the
-            (1-indexed) number of the amplifier used to read each detector
-            pixel. Pixels unassociated with any amplifier are set to 0.
-        oscansec_img : `numpy.ndarray`_
-            Overscan section of the detector as provided by setting the
-            (1-indexed) number of the amplifier used to read each detector
-            pixel. Pixels unassociated with any amplifier are set to 0.
-        """
-        # TODO -- Put a check in here to avoid data using the
-        #  original CCD (1 chip)
-
-
-        # Check for file; allow for extra .gz, etc. suffix
-        if not os.path.isfile(raw_file):
-            msgs.error(f'{raw_file} not found!')
-        hdu = io.fits_open(raw_file)
-
-        head0 = hdu[0].header
-
-        # Get post, pre-pix values
-        precol = head0['HIERARCH ESO DET OUT1 PRSCX']
-        postpix = head0['HIERARCH ESO DET OUT1 OVSCX']
-        preline = head0['HIERARCH ESO DET OUT1 PRSCY']
-        postline = head0['HIERARCH ESO DET OUT1 OVSCY']
-        x0 = head0['HIERARCH ESO DET WIN1 STRX'] # lower left pixel of X
-        x_npix = head0['HIERARCH ESO DET WIN1 NX'] - x0 + 1 # no. of pixels along X
-        y0 = head0['HIERARCH ESO DET WIN1 STRY'] # lower left pixel of Y
-        y_npix = head0['HIERARCH ESO DET WIN1 NY'] - y0 + 1 # no. of pixels along Y
-
-        # get the x and y binning factors...
-        #binning = head0['BINNING']
-
-        binning = self.get_meta_value(self.get_headarr(hdu), 'binning')
-        binspec, binspatial = map(int, binning.split(','))
-
-        # Validate the entered (list of) detector(s)
-        nimg, _det = self.validate_det(det)
-
-        # Grab the detector or mosaic parameters
-        mosaic = None if nimg == 1 else self.get_mosaic_par(det, hdu=hdu)
-        detectors = [self.get_detector_par(det, hdu=hdu)] if nimg == 1 else mosaic.detectors
-
-        # get the chips to read in
-        # DP: I don't know if this needs to still exist. I believe det is never None
-        if det is None:
-            chips = range(self.ndet)
-        else:
-            chips = [d-1 for d in _det]  # Indexing starts at 0 here
-
-        # get final datasec and oscan size (it's the same for every chip so
-        # it's safe to determine it outsize the loop)
-
-        # Create final image
-        if det is None:
-            # JFH: TODO is this a good idea?
-            image = np.zeros((x_npix, y_npix + 4 * postpix))
-            rawdatasec_img = np.zeros_like(image, dtype=int)
-            oscansec_img = np.zeros_like(image, dtype=int)
-        else:
-            data, oscan = uves_read_1chip(hdu, chips[0] + 1)
-            image = np.zeros((nimg, data.shape[0], data.shape[1] + oscan.shape[1]))
-            rawdatasec_img = np.zeros_like(image, dtype=int)
-            oscansec_img = np.zeros_like(image, dtype=int)
-
-
-        # Loop over the chips
-        for ii, tt in enumerate(chips):
-            image_ii, oscan_ii = uves_read_1chip(hdu, tt + 1)
-
-            # Indexing
-            x1, x2, y1, y2, o_x1, o_x2, o_y1, o_y2 = indexing(tt, postpix, det=det, xbin=binspatial, ybin=binspec)
-
-            # Fill
-            image[ii, y1:y2, x1:x2] = image_ii
-            image[ii, o_y1:o_y2, o_x1:o_x2] = oscan_ii
-            rawdatasec_img[ii, y1:y2-spectrim//binspec, x1:x2] = 1  # Amp
-            oscansec_img[ii, o_y1:o_y2-spectrim//binspec, o_x1:o_x2] = 1  # Amp
-
-        exptime = hdu[self.meta['exptime']['ext']].header[self.meta['exptime']['card']]
-
-        # Return
-        # Handle returning both single and multiple images
-        if nimg == 1:
-            return detectors[0], image[0], hdu, exptime, rawdatasec_img[0], oscansec_img[0]
-        return mosaic, image, hdu, exptime, rawdatasec_img, oscansec_img
+    # def get_rawimage(self, raw_file, det, spectrim=20):
+    #     """
+    #     Read raw images and generate a few other bits and pieces
+    #     that are key for image processing.
+    #
+    #     Based on readmhdufits.pro
+    #
+    #     Parameters
+    #     ----------
+    #     raw_file : :obj:`str`
+    #         File to read
+    #     det : :obj:`int`
+    #         1-indexed detector to read
+    #
+    #     Returns
+    #     -------
+    #     detector_par : :class:`pypeit.images.detector_container.DetectorContainer`
+    #         Detector metadata parameters.
+    #     raw_img : `numpy.ndarray`_
+    #         Raw image for this detector.
+    #     hdu : `astropy.io.fits.HDUList`_
+    #         Opened fits file
+    #     exptime : :obj:`float`
+    #         Exposure time read from the file header
+    #     rawdatasec_img : `numpy.ndarray`_
+    #         Data (Science) section of the detector as provided by setting the
+    #         (1-indexed) number of the amplifier used to read each detector
+    #         pixel. Pixels unassociated with any amplifier are set to 0.
+    #     oscansec_img : `numpy.ndarray`_
+    #         Overscan section of the detector as provided by setting the
+    #         (1-indexed) number of the amplifier used to read each detector
+    #         pixel. Pixels unassociated with any amplifier are set to 0.
+    #     """
+    #     # TODO -- Put a check in here to avoid data using the
+    #     #  original CCD (1 chip)
+    #
+    #
+    #     # Check for file; allow for extra .gz, etc. suffix
+    #     if not os.path.isfile(raw_file):
+    #         msgs.error(f'{raw_file} not found!')
+    #     hdu = io.fits_open(raw_file)
+    #
+    #     head0 = hdu[0].header
+    #
+    #     # Get post, pre-pix values
+    #     precol = head0['HIERARCH ESO DET OUT1 PRSCX']
+    #     postpix = head0['HIERARCH ESO DET OUT1 OVSCX']
+    #     preline = head0['HIERARCH ESO DET OUT1 PRSCY']
+    #     postline = head0['HIERARCH ESO DET OUT1 OVSCY']
+    #     x0 = head0['HIERARCH ESO DET WIN1 STRX'] # lower left pixel of X
+    #     x_npix = head0['HIERARCH ESO DET WIN1 NX'] - x0 + 1 # no. of pixels along X
+    #     y0 = head0['HIERARCH ESO DET WIN1 STRY'] # lower left pixel of Y
+    #     y_npix = head0['HIERARCH ESO DET WIN1 NY'] - y0 + 1 # no. of pixels along Y
+    #
+    #     # get the x and y binning factors...
+    #     #binning = head0['BINNING']
+    #
+    #     binning = self.get_meta_value(self.get_headarr(hdu), 'binning')
+    #     binspec, binspatial = map(int, binning.split(','))
+    #
+    #     # Validate the entered (list of) detector(s)
+    #     nimg, _det = self.validate_det(det)
+    #
+    #     # Grab the detector or mosaic parameters
+    #     mosaic = None if nimg == 1 else self.get_mosaic_par(det, hdu=hdu)
+    #     detectors = [self.get_detector_par(det, hdu=hdu)] if nimg == 1 else mosaic.detectors
+    #
+    #     # get the chips to read in
+    #     # DP: I don't know if this needs to still exist. I believe det is never None
+    #     if det is None:
+    #         chips = range(self.ndet)
+    #     else:
+    #         chips = [d-1 for d in _det]  # Indexing starts at 0 here
+    #
+    #     # get final datasec and oscan size (it's the same for every chip so
+    #     # it's safe to determine it outsize the loop)
+    #
+    #     # Create final image
+    #     if det is None:
+    #         # JFH: TODO is this a good idea?
+    #         image = np.zeros((x_npix, y_npix + 4 * postpix))
+    #         rawdatasec_img = np.zeros_like(image, dtype=int)
+    #         oscansec_img = np.zeros_like(image, dtype=int)
+    #     else:
+    #         data, oscan = uves_read_1chip(hdu, chips[0] + 1)
+    #         image = np.zeros((nimg, data.shape[0], data.shape[1] + oscan.shape[1]))
+    #         rawdatasec_img = np.zeros_like(image, dtype=int)
+    #         oscansec_img = np.zeros_like(image, dtype=int)
+    #
+    #
+    #     # Loop over the chips
+    #     for ii, tt in enumerate(chips):
+    #         image_ii, oscan_ii = uves_read_1chip(hdu, tt + 1)
+    #
+    #         # Indexing
+    #         x1, x2, y1, y2, o_x1, o_x2, o_y1, o_y2 = indexing(tt, postpix, det=det, xbin=binspatial, ybin=binspec)
+    #
+    #         # Fill
+    #         image[ii, y1:y2, x1:x2] = image_ii
+    #         image[ii, o_y1:o_y2, o_x1:o_x2] = oscan_ii
+    #         rawdatasec_img[ii, y1:y2-spectrim//binspec, x1:x2] = 1  # Amp
+    #         oscansec_img[ii, o_y1:o_y2-spectrim//binspec, o_x1:o_x2] = 1  # Amp
+    #
+    #     exptime = hdu[self.meta['exptime']['ext']].header[self.meta['exptime']['card']]
+    #
+    #     # Return
+    #     # Handle returning both single and multiple images
+    #     if nimg == 1:
+    #         return detectors[0], image[0], hdu, exptime, rawdatasec_img[0], oscansec_img[0]
+    #     return mosaic, image, hdu, exptime, rawdatasec_img, oscansec_img
         
 
     def get_echelle_angle_files(self):
@@ -1090,57 +1090,57 @@ def indexing(itt, postpix, det=None,xbin=1,ybin=1):
     # Return
     return x1, x2, y1, y2, o_x1, o_x2, o_y1, o_y2
 
-def uves_read_1chip(hdu,chipno):
-    """ Read one of the HIRES detectors
-
-    Parameters
-    ----------
-    hdu : HDUList
-    chipno : int
-
-    Returns
-    -------
-    data : ndarray
-    oscan : ndarray
-    """
-
-    # Extract datasec from header
-    x_pix = hdu[0].header['NAXIS1']
-    x0 = hdu[0].header['HIERARCH ESO DET WIN1 STRX']
-    y_pix = hdu[0].header['NAXIS2']
-    y0 = hdu[0].header['HIERARCH ESO DET WIN1 STRY']
-    precol = hdu[0].header['HIERARCH ESO DET OUT1 PRSCX']
-    postpix = hdu[0].header['HIERARCH ESO DET OUT1 OVSCX']
-
-    x1_dat = precol + x0
-    x2_dat = x_pix - postpix
-    y1_dat = y0
-    y2_dat = y_pix
-
-    x1_det = x0
-    x2_det = hdu[0].header['HIERARCH ESO DET OUT1 NX']
-    y1_det = y0
-    y2_det = hdu[0].header['HIERARCH ESO DET OUT1 NY']
-
-    # This rotates the image to be increasing wavelength to the top
-    #data = np.rot90((hdu[chipno].data).T, k=2)
-    #nx=data.shape[0]
-    #ny=data.shape[1]
-
-    # Science data
-    fullimage = hdu[chipno].data
-    data = fullimage[x1_dat:x2_dat,y1_dat:y2_dat]
-
-    # Overscan
-    oscan = fullimage[:,y2_dat:]
-
-    # Flip as needed
-    if x1_det > x2_det:
-        data = np.flipud(data)
-        oscan = np.flipud(oscan)
-    if y1_det > y2_det:
-        data = np.fliplr(data)
-        oscan = np.fliplr(oscan)
-
-    # Return
-    return data, oscan
+# def uves_read_1chip(hdu,chipno):
+#     """ Read one of the HIRES detectors
+#
+#     Parameters
+#     ----------
+#     hdu : HDUList
+#     chipno : int
+#
+#     Returns
+#     -------
+#     data : ndarray
+#     oscan : ndarray
+#     """
+#
+#     # Extract datasec from header
+#     x_pix = hdu[0].header['NAXIS1']
+#     x0 = hdu[0].header['HIERARCH ESO DET WIN1 STRX']
+#     y_pix = hdu[0].header['NAXIS2']
+#     y0 = hdu[0].header['HIERARCH ESO DET WIN1 STRY']
+#     precol = hdu[0].header['HIERARCH ESO DET OUT1 PRSCX']
+#     postpix = hdu[0].header['HIERARCH ESO DET OUT1 OVSCX']
+#
+#     x1_dat = precol + x0
+#     x2_dat = x_pix - postpix
+#     y1_dat = y0
+#     y2_dat = y_pix
+#
+#     x1_det = x0
+#     x2_det = hdu[0].header['HIERARCH ESO DET OUT1 NX']
+#     y1_det = y0
+#     y2_det = hdu[0].header['HIERARCH ESO DET OUT1 NY']
+#
+#     # This rotates the image to be increasing wavelength to the top
+#     #data = np.rot90((hdu[chipno].data).T, k=2)
+#     #nx=data.shape[0]
+#     #ny=data.shape[1]
+#
+#     # Science data
+#     fullimage = hdu[chipno].data
+#     data = fullimage[x1_dat:x2_dat,y1_dat:y2_dat]
+#
+#     # Overscan
+#     oscan = fullimage[:,y2_dat:]
+#
+#     # Flip as needed
+#     if x1_det > x2_det:
+#         data = np.flipud(data)
+#         oscan = np.flipud(oscan)
+#     if y1_det > y2_det:
+#         data = np.fliplr(data)
+#         oscan = np.fliplr(oscan)
+#
+#     # Return
+#     return data, oscan
