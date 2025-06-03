@@ -979,7 +979,8 @@ class Spectrograph:
             print('{0}   {1}'.format(key.rjust(nk), card.rjust(nc)))
         print('')
 
-    def get_detector_par(self, det, hdu=None):
+    def \
+        get_detector_par(self, det, hdu=None):
         """
         Read/Set the detector metadata.
 

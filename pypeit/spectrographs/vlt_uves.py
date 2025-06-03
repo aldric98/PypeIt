@@ -76,16 +76,15 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
             required_ftypes=['science', 'standard'])  # Need to convert to : separated
         self.meta['dec'] = dict(ext=0, card='DEC', required_ftypes=['science', 'standard'])
         self.meta['target'] = dict(ext=0, card='OBJECT')
-        self.meta['binning'] = dict(card=None, compound=True)
-
+        self.meta['binning'] = dict(card=None, compound=True, required_ftypes=['science', 'standard', 'bias', 'arc', 'flat'
+                                                                               ,'pixelflat', 'illumflat', 'trace'])
         self.meta['mjd'] = dict(ext=0, card='MJD-OBS')
         self.meta['exptime'] = dict(ext=0, card='EXPTIME')
         self.meta['airmass'] = dict(ext=0, card='HIERARCH ESO TEL AIRM START', required_ftypes=['science', 'standard'])
+
         # Extras for config and frametyping
-        # self.meta['dispname'] = dict(ext=0, card='HIERARCH ESO INS GRAT1 WLEN')
         self.meta['dispname'] = dict(card=None, compound=True)
         self.meta['idname'] = dict(ext=0, card='HIERARCH ESO DPR CATG')
-        # self.meta['arm'] = dict(ext=0, card='HIERARCH ESO INS PATH')
         self.meta['arm'] = dict(card=None, compound=True)
         self.meta['instrument'] = dict(ext=0, card='INSTRUME')
 
@@ -103,18 +102,35 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
         Returns:
             object: Metadata value read from the header(s).
         """
+
         if meta_key == 'binning':
-            if 'HIERARCH ESO DET WIN1 BINX' in headarr[0]:
+            try:
                 binspatial = headarr[0]['HIERARCH ESO DET WIN1 BINX']
-            else:
+                msgs.warn(f"binsptial = {binspatial}")
+            except KeyError:
+                msgs.warn("Cannot determine spatial binning from the header. Setting to 1")
                 binspatial = 1
-            if 'HIERARCH ESO DET WIN1 BINY' in headarr[0]:
+
+            try:
                 binspec = headarr[0]['HIERARCH ESO DET WIN1 BINY']
-            else:
+            except KeyError:
+                msgs.warn("Cannot determine spectral binning from the header. Setting to 1")
                 binspec = 1
+
             return parse.binning2string(binspec, binspatial)
 
-        elif meta_key == 'arm':
+        # if meta_key == 'binning':
+        #     if 'HIERARCH ESO DET WIN1 BINX' in headarr[0]:
+        #         binspatial = headarr[0]['HIERARCH ESO DET WIN1 BINX']
+        #     else:
+        #         binspatial = 1
+        #     if 'HIERARCH ESO DET WIN1 BINY' in headarr[0]:
+        #         binspec = headarr[0]['HIERARCH ESO DET WIN1 BINY']
+        #     else:
+        #         binspec = 1
+        #     return parse.binning2string(binspec, binspatial)
+
+        if meta_key == 'arm':
             if 'HIERARCH ESO TPL NAME' in headarr[0]:
                 tplid = headarr[0]['HIERARCH ESO TPL NAME'].lower()
                 if 'blue' in tplid:
@@ -127,7 +143,7 @@ class VLTUVESSpectrograph(spectrograph.Spectrograph):
                     arm = 'None'
             return arm
 
-        elif meta_key == 'dispname':
+        if meta_key == 'dispname':
             if 'HIERARCH ESO INS GRAT1 WLEN' in headarr[0]:
                 cwlen = headarr[0]['HIERARCH ESO INS GRAT1 WLEN']
             elif 'HIERARCH ESO INS GRAT2 WLEN' in headarr[0]:
@@ -651,7 +667,13 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
         """
 
         # Binning
-        binning = '1,1' if hdu is None else self.get_meta_value(self.get_headarr(hdu), 'binning')
+        if hdu is None:
+            binning = '1,1'
+            msgs.error("setting binning to 1,1")
+        else:
+            binning = self.get_meta_value(self.get_headarr(hdu), 'binning')
+
+        # binning = '1,1' if hdu is None else self.get_meta_value(self.get_headarr(hdu), 'binning')
 
         # Detector
         detector_dict = dict(
@@ -685,6 +707,7 @@ class VLTUVESBlueSpectrograph(VLTUVESSpectrograph):
             
         # Instantiate
         detector_dicts = [detector_dict]
+
         return detector_container.DetectorContainer( **detector_dicts[det-1])
 
     def config_specific_par(self, scifile, inp_par=None):
